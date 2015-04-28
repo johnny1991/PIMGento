@@ -171,7 +171,9 @@ abstract class Pimgento_Core_Model_Import_Abstract
      */
     protected function isEnterprise()
     {
-        return Mage::getEdition() == Mage::EDITION_ENTERPRISE;
+        /** @var Pimgento_Core_Helper_Data $helper */
+        $helper = Mage::helper('pimgento_core');
+       return $helper->isEnterprise();
     }
 
     /**

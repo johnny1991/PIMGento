@@ -175,6 +175,9 @@ class Pimgento_Core_Model_Resource_Request extends Mage_Core_Model_Resource_Db_A
     {
         $adapter = $this->_getWriteAdapter();
 
+        /** @var Pimgento_Core_Helper_Data $helper */
+        $helper = Mage::helper('pimgento_core');
+
         foreach ($values as $code => $value) {
 
             if (($attribute = $this->getAttribute($code, $entityTypeId))) {
@@ -193,9 +196,10 @@ class Pimgento_Core_Model_Resource_Request extends Mage_Core_Model_Resource_Db_A
                             )
                         );
 
+
                     $backendType = $attribute['backend_type'];
 
-                    if ($code == 'url_key' && Mage::getEdition() == Mage::EDITION_ENTERPRISE) {
+                    if ($code == 'url_key' && $helper->isEnterprise()){
                         $backendType = 'url_key';
                     }
 
@@ -269,7 +273,7 @@ class Pimgento_Core_Model_Resource_Request extends Mage_Core_Model_Resource_Db_A
      */
     public function getTableName($name)
     {
-        /* @var $coreResource Mage_Core_Model_Resource */
+        /* @var Mage_Core_Model_Resource $resource */
         $resource = Mage::getSingleton('core/resource');
 
         return $resource->getTableName('tmp_pimgento_core_' . $name);
@@ -397,6 +401,29 @@ class Pimgento_Core_Model_Resource_Request extends Mage_Core_Model_Resource_Db_A
         $pdo->exec($query);
 
         return $this;
+    }
+
+    /**
+     * Retrieve connection for write data
+     *
+     * @return Varien_Db_Adapter_Interface|Pimgento_Core_Model_Adapter_Pdo_Mysql
+     */
+    protected function _getWriteAdapter()
+    {
+
+        /**
+         * If Magento < 1.8, we change override adapter only for the module to keep compatibility
+         */
+        if (version_compare(Mage::getVersion(), '1.8', '<')) {
+            return $this->_resources->createConnection(
+                'pimgento_write',
+                'pimgento_mysql',
+                (array)Mage::getConfig()->getResourceConnectionConfig('core_write')
+            );
+
+        }
+
+        return $this->_getConnection('write');
     }
 
 }

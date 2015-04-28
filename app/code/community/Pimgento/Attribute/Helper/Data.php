@@ -16,22 +16,24 @@ class Pimgento_Attribute_Helper_Data extends Mage_Core_Helper_Data
     public function getTypes()
     {
         $types = array(
-            'pim_catalog_identifier'   => $this->_types('text'),
-            'pim_catalog_text'         => $this->_types('text'),
-            'pim_catalog_metric'       => $this->_types('text'),
-            'pim_catalog_number'       => $this->_types('text'),
-            'pim_catalog_textarea'     => $this->_types('textarea'),
-            'pim_catalog_date'         => $this->_types('date'),
-            'pim_catalog_boolean'      => $this->_types('boolean'),
+            'pim_catalog_identifier' => $this->_types('text'),
+            'pim_catalog_text' => $this->_types('text'),
+            'pim_catalog_metric' => $this->_types('text'),
+            'pim_catalog_number' => $this->_types('text'),
+            'pim_catalog_textarea' => $this->_types('textarea'),
+            'pim_catalog_date' => $this->_types('date'),
+            'pim_catalog_boolean' => $this->_types('boolean'),
             'pim_catalog_simpleselect' => $this->_types('select'),
-            'pim_catalog_multiselect'  => $this->_types('multiselect'),
-            'default'                  => $this->_types('text'),
+            'pim_catalog_multiselect' => $this->_types('multiselect'),
+            'default' => $this->_types('text'),
         );
 
         $specific = unserialize(Mage::getStoreConfig('pimdata/attribute/types'));
 
-        foreach ($specific as $type) {
-            $types[$type['pimgento_type']] = $this->_types($type['magento_type']);
+        if ($specific && is_array($specific)) {
+            foreach ($specific as $type) {
+                $types[$type['pimgento_type']] = $this->_types($type['magento_type']);
+            }
         }
 
         return $types;

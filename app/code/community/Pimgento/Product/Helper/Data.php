@@ -19,15 +19,11 @@ class Pimgento_Product_Helper_Data extends Mage_Core_Helper_Data
 
         $transform = array();
 
-        if (is_array($matches)) {
-            foreach ($matches as $match) {
-                if (isset($match['pimgento_attribute'])) {
-                    if (!isset($transform[$match['pimgento_attribute']])) {
-                        $transform[$match['pimgento_attribute']] = array();
-                    }
-                    $transform[$match['pimgento_attribute']][] = $match['magento_attribute'];
-                }
+        foreach ($matches as $match) {
+            if (!isset($transform[$match['pimgento_attribute']])) {
+                $transform[$match['pimgento_attribute']] = array();
             }
+            $transform[$match['pimgento_attribute']][] = $match['magento_attribute'];
         }
 
         return $transform;

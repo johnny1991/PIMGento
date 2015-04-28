@@ -3,6 +3,17 @@
  * @author    Agence Dn'D <magento@dnd.fr>
  * @copyright Copyright (c) 2015 Agence Dn'D (http://www.dnd.fr)
  * @license   http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ *
+ * @method getCommand()
+ * @method setFile(string $file)
+ * @method string getFile()
+ * @method getStepNumber()
+ * @method setTaskId(string $id)
+ * @method string getTaskId()
+ * @method array getTasks()
+ * @method array getTask()
+ * @method setLock(bool $lock)
+ * @method bool getLock()
  */
 
 class Pimgento_Core_Model_Task extends Varien_Object
@@ -251,7 +262,7 @@ class Pimgento_Core_Model_Task extends Varien_Object
      *
      * @param array $items
      *
-     * @return void
+     * @return $this
      */
     public function addOptions($items)
     {

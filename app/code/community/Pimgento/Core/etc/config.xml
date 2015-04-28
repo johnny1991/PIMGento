@@ -48,6 +48,17 @@
                 </connection>
             </pimgento_core_setup>
         </resources>
+        <resource>
+            <connection>
+                <types>
+                    <pimgento_mysql>
+                        <adapter>Pimgento_Core_Model_Adapter_Pdo_Mysql</adapter>
+                        <class>Mage_Core_Model_Resource_Type_Db_Pdo_Mysql</class>
+                        <compatibleMode>1</compatibleMode>
+                    </pimgento_mysql>
+                </types>
+            </connection>
+        </resource>
         <events>
             <task_executor_start>
                 <observers>

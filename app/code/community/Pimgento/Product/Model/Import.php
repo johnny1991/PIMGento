@@ -45,16 +45,15 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
 
         if (!$lines) {
             $task->error(
-                Mage::helper('pimgento_product')->__(
+                $this->getProductHelper()->__(
                     'No data to insert, verify the file is not empty or CSV configuration is correct'
                 )
             );
         }
 
         $task->setMessage(
-            Mage::helper('pimgento_product')->__('%s lines found', $lines)
+            $this->getProductHelper()->__('%s lines found', $lines)
         );
-
         return true;
     }
 
@@ -71,7 +70,7 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
 
         $sku = 'sku';
 
-        $transformer = Mage::helper('pimgento_product')->transformer();
+        $transformer = $this->getProductHelper()->transformer();
 
         foreach ($transformer as $attribute => $match) {
             if ((in_array('sku', $match))) {
@@ -81,7 +80,7 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
 
         if (!$this->columnsRequired(array($sku), $task)) {
             $task->error(
-                Mage::helper('pimgento_product')->__('Column "%s" not found', $sku)
+                $this->getProductHelper()->__('Column "%s" not found', $sku)
             );
         }
 
@@ -116,7 +115,7 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
     {
         if (!$this->getConfig('configurable_enabled')) {
             $task->setMessage(
-                Mage::helper('pimgento_product')->__('Configurable product creation is disabled')
+                $this->getProductHelper()->__('Configurable product creation is disabled')
             );
             return false;
         }
@@ -135,7 +134,7 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
 
         if (!count($attributes)) {
             $task->setMessage(
-                Mage::helper('pimgento_product')->__(
+                $this->getProductHelper()->__(
                     'No attribute selected in configuration, configurable products will not be created'
                 )
             );
@@ -189,7 +188,7 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
 
         $stores = $helper->getStoresCurrency();
 
-        $transformer = Mage::helper('pimgento_product')->transformer();
+        $transformer = $this->getProductHelper()->transformer();
 
         $price = 'price';
         $specialPrice = 'special_price';
@@ -221,7 +220,7 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
                     ),
                 );
 
-                foreach ($columns as $attribute => $cols) {
+                foreach ($columns as $cols) {
                     foreach ($cols as $column) {
                         if ($adapter->tableColumnExists($this->getTable(), $column)) {
 
@@ -247,7 +246,7 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
             } else {
                 $success = false;
                 $task->setMessage(
-                    Mage::helper('pimgento_product')->__(
+                    $this->getProductHelper()->__(
                         'Warning: %s column not found in CSV file', $match['attribute']
                     )
                 );
@@ -276,6 +275,7 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
      */
     public function matchEntity($task)
     {
+
         $this->getRequest()->matchEntity($this->getCode(), 'catalog/product', 'entity_id');
 
         return true;
@@ -389,7 +389,7 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
         $family = 'family';
 
         if (!$adapter->tableColumnExists($this->getTable(), 'family')) {
-            /* @var $product Mage_Catalog_Model_Porduct */
+            /* @var $product Mage_Catalog_Model_Product */
             $product = Mage::getModel('catalog/product');
 
             $family = $this->_zde($product->getDefaultAttributeSetId());
@@ -460,9 +460,14 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
             $helper->getStoresWebsites()
         );
 
+
+//        var_dump($helper->getStoresLang());
+//        var_dump($helper->getStoresWebsites());
+//        var_dump($codes);
+
         $columns = $this->getRequest()->getFirstLine($file);
 
-        $transformer = Mage::helper('pimgento_product')->transformer();
+        $transformer = $this->getProductHelper()->transformer();
 
         foreach ($columns as $column) {
 
@@ -479,6 +484,20 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
                     $translation = true;
 
                     if (preg_match('/^(?P<attribute>.*)-' . $code . '$/', $column, $matches)) {
+
+                        /*
+                         * Localizable attribute
+                         */
+                        if (preg_match('/^(?P<attribute>.*)-(?P<locale>.*)-' . $code . '$/', $column, $localeMatches)) {
+                            $ids = [
+                                $helper->getStoresLang()[$localeMatches['locale']][$helper->getStoresWebsites()[$code][0]],
+                            ];
+                            $matches = $localeMatches;
+                        }
+
+                        if (Mage::getStoreConfig('pimdata/general/default_website') == $code) {
+                            $ids[] = Mage_Core_Model_App::ADMIN_STORE_ID;
+                        }
 
                         foreach ($ids as $key => $storeId) {
 
@@ -503,8 +522,8 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
                                     );
                                     $values = array(
                                         $column . '_' . $key => $this->_zde(
-                                            'CONCAT(`' . $column . '`,"-' . $key . '")'
-                                        ),
+                                                'CONCAT(`' . $column . '`,"-' . $key . '")'
+                                            ),
                                     );
                                     $adapter->update($this->getTable(), $values);
 
@@ -512,6 +531,7 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
                                 }
 
                             }
+
 
                             $this->getRequest()->setValues(
                                 $this->getCode(), 'catalog/product', $values, 4, $storeId
@@ -559,7 +579,7 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
     {
         if (!$this->getConfig('configurable_enabled')) {
             $task->setMessage(
-                Mage::helper('pimgento_product')->__('Configurable product creation is disabled')
+                $this->getProductHelper()->__('Configurable product creation is disabled')
             );
             return false;
         }
@@ -573,15 +593,15 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
 
         $query = $adapter->query(
             $adapter->select()
-            ->from(
-                $this->getTable(),
-                array(
-                    'entity_id',
-                    '_attributes',
-                    '_children'
+                ->from(
+                    $this->getTable(),
+                    array(
+                        'entity_id',
+                        '_attributes',
+                        '_children'
+                    )
                 )
-            )
-            ->where('_type_id = ?', 'configurable')
+                ->where('_type_id = ?', 'configurable')
         );
 
         $stores = Mage::app()->getStores();
@@ -606,13 +626,14 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
 
                 $superAttributeId = $adapter->fetchOne(
                     $adapter->select()
-                        ->from($resource->getTable('catalog/product_super_attribute'))
+                        ->from($resource->getTable('catalog/product_super_attribute'), '*')
                         ->where('attribute_id = ?', $id)
                         ->where('product_id = ?', $row['entity_id'])
                         ->limit(1)
                 );
 
                 foreach ($stores as $store) {
+                    /** @var Mage_Core_Model_Store $store */
 
                     $values = array(
                         'product_super_attribute_id' => $superAttributeId,
@@ -630,14 +651,14 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
 
                     $childId = $adapter->fetchOne(
                         $adapter->select()
-                        ->from(
-                            $resource->getTable('catalog/product'),
-                            array(
-                                'entity_id'
+                            ->from(
+                                $resource->getTable('catalog/product'),
+                                array(
+                                    'entity_id'
+                                )
                             )
-                        )
-                        ->where('sku = ?', $child)
-                        ->limit(1)
+                            ->where('sku = ?', $child)
+                            ->limit(1)
                     );
 
                     if ($childId) {
@@ -681,6 +702,8 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
         $websites = Mage::app()->getWebsites();
 
         foreach ($websites as $website) {
+            /** @var Mage_Core_Model_Website $website */
+
             $select = $adapter->select()
                 ->from(
                     $resource->getTable('catalog/product'),
@@ -717,7 +740,7 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
 
         $stores = $helper->getStoresCurrency();
 
-        $transformer = Mage::helper('pimgento_product')->transformer();
+        $transformer = $this->getProductHelper()->transformer();
 
         $price = 'price';
         $specialPrice = 'special_price';
@@ -802,7 +825,7 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
     {
         if (!$this->getConfig('configurable_enabled')) {
             $task->setMessage(
-                Mage::helper('pimgento_product')->__('Configurable product creation is disabled')
+                $this->getProductHelper()->__('Configurable product creation is disabled')
             );
             return false;
         }
@@ -840,12 +863,12 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
                         'value_index'                => 'o.option_id',
                         'is_percent'                 => $this->_zde(0),
                         'pricing_value'              => $this->_zde(
-                            'IF(
-                            IF(d3.value, d3.value, d1.value) - IF(d4.value, d4.value, d2.value) >= 0,
-                            IF(d3.value, d3.value, d1.value) - IF(d4.value, d4.value, d2.value),
-                            0
-                        )'
-                        ),
+                                'IF(
+                                IF(d3.value, d3.value, d1.value) - IF(d4.value, d4.value, d2.value) >= 0,
+                                IF(d3.value, d3.value, d1.value) - IF(d4.value, d4.value, d2.value),
+                                0
+                            )'
+                            ),
                         'website_id'                 => $this->_zde(0),
                     )
                 )->joinInner(
@@ -1079,7 +1102,7 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
     {
         if (!$this->getConfig('reindex')) {
             $task->setMessage(
-                Mage::helper('pimgento_product')->__('Reindex is disabled')
+                $this->getProductHelper()->__('Reindex is disabled')
             );
             return false;
         }
@@ -1123,6 +1146,14 @@ class Pimgento_Product_Model_Import extends Pimgento_Core_Model_Import_Abstract
         Mage::dispatchEvent('shell_reindex_finalize_process');
 
         return true;
+    }
+
+    /**
+     * @return Pimgento_Product_Helper_Data
+     */
+    public function getProductHelper()
+    {
+        return Mage::helper('pimgento_product');
     }
 
 }

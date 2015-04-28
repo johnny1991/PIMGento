@@ -26,6 +26,8 @@ class Pimgento_Core_Helper_Data extends Mage_Core_Helper_Data
         $lang = array($adminLang => array(0));
 
         foreach ($stores as $store) {
+            /** @var  Mage_Core_Model_Store $store */
+
             $local = Mage::getStoreConfig('general/locale/code', $store->getId());
 
             if (!isset($lang[$local])) {
@@ -60,6 +62,8 @@ class Pimgento_Core_Helper_Data extends Mage_Core_Helper_Data
         );
 
         foreach ($stores as $store) {
+            /** @var  Mage_Core_Model_Store $store */
+
             $currency = Mage::getStoreConfig('currency/options/default', $store->getId());
 
             if (!isset($currencies[$currency])) {
@@ -89,6 +93,8 @@ class Pimgento_Core_Helper_Data extends Mage_Core_Helper_Data
         $websites = array();
 
         foreach ($stores as $store) {
+            /** @var  Mage_Core_Model_Store $store */
+
             $code = $this->getChannel($store->getWebsite()->getCode());
 
             if (!isset($websites[$code])) {
@@ -199,6 +205,20 @@ class Pimgento_Core_Helper_Data extends Mage_Core_Helper_Data
         }
 
         return $directory;
+    }
+
+    public function isEnterprise()
+    {
+        /**
+         * If Magento < 1.7
+         * Before Magento 1.7, there isn't Mage::getEdition() fonctionnality
+         */
+
+        if (version_compare(Mage::getVersion(), '1.7', '<')) {
+            return Mage::getConfig()->getModuleConfig('Enterprise_Enterprise') && Mage::getConfig()->getModuleConfig('Enterprise_AdminGws') && Mage::getConfig()->getModuleConfig('Enterprise_Checkout') && Mage::getConfig()->getModuleConfig('Enterprise_Customer');
+        }
+
+        return Mage::getEdition() == Mage::EDITION_ENTERPRISE;
     }
 
 }

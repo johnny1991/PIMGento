@@ -17,7 +17,6 @@ class Pimgento_Core_Model_Log
      */
     public function error(Varien_Event_Observer $observer)
     {
-        /* @var $tasks Pimgento_Core_Model_Task */
         $error = $observer->getEvent()->getError();
 
         if ($this->getFile()) {
