@@ -114,7 +114,7 @@ abstract class Pimgento_Core_Model_Import_Abstract
     /**
      * Retrieve adapter
      *
-     * @return Varien_Db_Adapter_Interface
+     * @return Varien_Db_Adapter_Interface|Pimgento_Core_Model_Adapter_Interface
      */
     protected function getAdapter()
     {
