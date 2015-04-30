@@ -179,13 +179,12 @@ class Pimgento_Core_Model_Request extends Mage_Core_Model_Abstract
      */
     public function getFirstLine($file)
     {
-        $handle = fopen($file, 'r');
-        $line = preg_replace("/\\r\\n/", "", fgets($handle));
-        fclose($handle);
 
-        $fieldsTerminated = Mage::getStoreConfig('pimdata/general/csv_fields_terminated');
+        $csv = new Varien_File_Csv();
+        $csv->setDelimiter(Mage::getStoreConfig('pimdata/general/csv_fields_terminated'));
+        $lines = $csv->getData($file);
 
-        return explode($fieldsTerminated, $line);
+        return reset($lines);
     }
 
 }
