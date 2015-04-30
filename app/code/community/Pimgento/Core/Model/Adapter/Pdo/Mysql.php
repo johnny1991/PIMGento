@@ -9,6 +9,7 @@
  * Pimgento Mysql PDO DB adapter
  */
 class Pimgento_Core_Model_Adapter_Pdo_Mysql extends Varien_Db_Adapter_Pdo_Mysql
+    implements Pimgento_Core_Model_Adapter_Interface
 {
     /**
      * Change table auto increment value
