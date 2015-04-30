@@ -406,7 +406,7 @@ class Pimgento_Core_Model_Resource_Request extends Mage_Core_Model_Resource_Db_A
     /**
      * Retrieve connection for write data
      *
-     * @return Varien_Db_Adapter_Interface|Pimgento_Core_Model_Adapter_Pdo_Mysql
+     * @return Varien_Db_Adapter_Interface|Pimgento_Core_Model_Adapter_Interface
      */
     protected function _getWriteAdapter()
     {
