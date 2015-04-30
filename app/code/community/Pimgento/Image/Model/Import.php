@@ -26,7 +26,6 @@ class Pimgento_Image_Model_Import extends Pimgento_Core_Model_Import_Abstract
             $this->getCode(),
             array('code', 'image', 'small_image', 'thumbnail', 'gallery')
         );
-
         return true;
     }
 
@@ -84,6 +83,13 @@ class Pimgento_Image_Model_Import extends Pimgento_Core_Model_Import_Abstract
     }
 
     /**
+     * TODO improve this function for multi-website
+     * This function is not functionnal with a multi-website
+     *
+     * Example : If i have 2 websites, i want 1 image by website, this function put 2 images by website
+     * To resolve the problem, we need to add a column "store" on temporary table and separate stores data
+     * then we add data to table
+     *
      * Move images (Step 3)
      *
      * @param Pimgento_Core_Model_Task $task
